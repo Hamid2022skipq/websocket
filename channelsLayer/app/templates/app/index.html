@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="shortcut icon"
+      href="https://images.pexels.com/photos/325333/pexels-photo-325333.jpeg?auto=compress&cs=tinysrgb&w=400"
+      type="image/x-icon"
+    />
+    <title>Chat app</title>
+  </head>
+  <body>
+    <textarea name="" id="chat-log" cols="30" rows="10"></textarea> <br />
+    <input
+      type="text"
+      name=""
+      id="chat-message-log"
+      placeholder="Enter your Message"
+    /><br />
+    <br />
+    <input type="submit" value="Send" id="chat-message-submit" />
+    {{groupname|json_script:'group-name'}}
+
+    <script>
+        const groupName=JSON.parse(document.getElementById('group-name').textContent)
+        console.log(groupName)
+    //   var ws = new WebSocket("ws://127.0.0.1:8000/ws/ac/");
+      var ws = new WebSocket(`ws://127.0.0.1:8000/ws/ac/${groupName}/`);
+      ws.onopen = function (event) {
+        console.log("WebSocket connection open....", event);
+        // ws.send("Hi, from client....");
+      };
+      ws.onerror = function (event) {
+        console.log("Websocket error occurred....", event);
+      };
+      ws.onmessage = function (event) {
+        console.log("Message received from server....", JSON.parse(event["data"])['msg']);
+        document.getElementById("chat-log").value =JSON.parse(event["data"])['msg'];
+      };
+      ws.onclose = function (event) {
+        console.log("Websocket connection closed....", event);
+      };
+
+      // ws.addEventListener('open',function (event) {
+      //     console.log("WebSocket connection open....",event);
+      //     ws.send("Hi, from client....");
+
+      // })
+      // ws.addEventListener('error',function (event) {
+      //     console.log("WebSocket connection open....",event);
+
+      // })
+      // ws.addEventListener('message',function (event) {
+      //     console.log("Message received from server....",event);
+      // })
+      // ws.addEventListener('close',function (event) {
+      //     console.log("Websocket connection closed....",event);
+      // })
+      document.getElementById("chat-message-submit").onclick = function (e) {
+        const message = document.getElementById("chat-message-log").value;
+        ws.send(JSON.stringify({ msg: message }));
+        message.value = "";
+      };
+    </script>
+  </body>
+</html>
